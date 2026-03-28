@@ -6,7 +6,7 @@
 
 import streamlit as st
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 import os
 
 # Secrets Manager から読み込む
@@ -23,15 +23,16 @@ if "messages" not in st.session_state:
 def communicate():
     messages = st.session_state["messages"]
 
-    user_message = HumanMessage(
-        content=st.session_state["user_input"]
-    )
+    # ユーザー入力を HumanMessage に変換
+    user_message = HumanMessage(content=st.session_state["user_input"])
     messages.append(user_message)
 
-    # ★ ここが重要：辞書形式で渡す
-    response = chat.invoke({"messages": messages})
+    # ★ ChatOpenAI は BaseMessage のリストを直接受け取る
+    response = chat.invoke(messages)
 
-    messages.append(response)
+    # ★ ChatResult → AIMessage に変換（これが重要）
+    ai_message = AIMessage(content=response.content)
+    messages.append(ai_message)
 
     st.session_state["user_input"] = ""
 
@@ -42,6 +43,6 @@ st.text_input("メッセージを入力してください。", key="user_input",
 
 for message in reversed(st.session_state["messages"][1:]):
     speaker = "🙂"
-    if message.type == "ai":
+    if isinstance(message, AIMessage):
         speaker = "🤖"
     st.write(speaker + ": " + message.content)
