@@ -9,7 +9,7 @@ import os
 
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 
 # --- API Key ---
 os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
