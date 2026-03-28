@@ -8,9 +8,12 @@ import streamlit as st
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 import os
-import secret_keys  # 外部ファイルにAPI keyを保存
 
-os.environ["OPENAI_API_KEY"] = secret_keys.openai_api_key
+#import secret_keys  # 外部ファイルにAPI keyを保存
+#os.environ["OPENAI_API_KEY"] = secret_keys.openai_api_key
+
+# Secrets Manager から読み込む
+os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 
 chat = ChatOpenAI(model="gpt-3.5-turbo")
 
