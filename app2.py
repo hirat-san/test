@@ -5,59 +5,62 @@
 
 
 import streamlit as st
-from langchain_openai import ChatOpenAI
-from langchain.schema import HumanMessage, SystemMessage
-from langchain.prompts.chat import (
-    ChatPromptTemplate,
-    HumanMessagePromptTemplate,
-    SystemMessagePromptTemplate
-)
 import os
-#import secret_keys  # 外部ファイルにAPI keyを保存
-#os.environ["OPENAI_API_KEY"] = "My API key"
 
-# Streamlitの Secrets Manager から読み込む
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, SystemMessage
+from langchain.prompts import ChatPromptTemplate
+
+# --- API Key ---
 os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 
-chat = ChatOpenAI(model="gpt-3.5-turbo")
+# --- LLM ---
+chat = ChatOpenAI(model="gpt-4o-mini")
 
-# プロンプトのテンプレート
+# --- Prompt Template ---
 system_template = (
-    "あなたは、{source_lang} を {target_lang}に翻訳する優秀な翻訳アシスタントです。翻訳結果以外は出力しないでください。"
+    "あなたは、{source_lang} を {target_lang} に翻訳する優秀な翻訳アシスタントです。"
+    "翻訳結果以外は出力しないでください。"
 )
-system_message_prompt = SystemMessagePromptTemplate.from_template(system_template)
-
-human_template = "{text}"
-human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
 
 chat_prompt = ChatPromptTemplate.from_messages(
-    [system_message_prompt, human_message_prompt]
+    [
+        ("system", system_template),
+        ("human", "{text}")
+    ]
 )
 
+# --- Session State ---
 if "response" not in st.session_state:
-    st.session_state["response"]= ""
+    st.session_state["response"] = ""
 
-# LLMとやりとりする関数
+# --- Communicate Function ---
 def communicate():
     text = st.session_state["user_input"]
-    response = chat(
-        chat_prompt.format_prompt(
-            source_lang=source_lang, target_lang=target_lang, text=text
-        ).to_messages()
+
+    messages = chat_prompt.format_messages(
+        source_lang=st.session_state["source_lang"],
+        target_lang=st.session_state["target_lang"],
+        text=text
     )
+
+    response = chat(messages)
     st.session_state["response"] = response.content
 
-# ユーザーインターフェイスの構築
+
+# --- UI ---
 st.title("翻訳アプリ")
-st.write("LangChainを使った翻訳アプリです。")
+st.write("LangChain を使った翻訳アプリです。")
 
 options = ["日本語", "英語", "スペイン語", "ドイツ語", "フランス語", "中国語"]
-source_lang = st.selectbox(label="翻訳元", options=options)
-target_lang = st.selectbox(label="翻訳先", options=options)
+
+st.session_state["source_lang"] = st.selectbox("翻訳元", options)
+st.session_state["target_lang"] = st.selectbox("翻訳先", options)
+
 st.text_input("翻訳する文章を入力してください。", key="user_input")
 st.button("翻訳", type="primary", on_click=communicate)
 
-if st.session_state["user_input"] != "":
+if st.session_state["response"]:
     st.write("翻訳結果:")
     st.write(st.session_state["response"])
 
