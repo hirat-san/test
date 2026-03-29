@@ -44,10 +44,14 @@ def speak(text):
         input=text
     )
 
-    # ★ ここが重要：speech.read() ではなく speech.content を使う
     audio_bytes = speech.content
 
+    # 念のため base64 の場合も対応
+    if isinstance(audio_bytes, str):
+        audio_bytes = base64.b64decode(audio_bytes)
+
     st.audio(audio_bytes, format="audio/mp3")
+
 
 # --- 翻訳処理 ---
 def communicate():
