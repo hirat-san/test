@@ -8,7 +8,6 @@ import streamlit as st
 import os
 
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
 
 # --- API Key ---
@@ -38,13 +37,16 @@ if "response" not in st.session_state:
 def communicate():
     text = st.session_state["user_input"]
 
-    messages = chat_prompt.format_messages(
+    # PromptValue を作成
+    prompt_value = chat_prompt.format_prompt(
         source_lang=st.session_state["source_lang"],
         target_lang=st.session_state["target_lang"],
         text=text
     )
 
-    response = chat(messages)
+    # ChatOpenAI の正しい呼び出し方法（invoke）
+    response = chat.invoke(prompt_value)
+
     st.session_state["response"] = response.content
 
 
