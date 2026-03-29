@@ -1,4 +1,5 @@
-streamlit
+streamlit==1.20.0
 langchain
 langchain-openai
 openai
+tiktoken
