@@ -38,17 +38,28 @@ if "response" not in st.session_state:
 
 # --- 音声読み上げ（TTS） ---
 def speak(text):
+    st.write("🔍 TTS開始")
+
     speech = client.audio.speech.create(
         model="gpt-4o-mini-tts",
         voice="alloy",
         input=text
     )
 
-    audio_bytes = speech.content
+    # レスポンスの型とサイズを確認
+    st.write(f"type: {type(speech)}")
+    st.write(f"dir: {dir(speech)}")
 
-    # 念のため base64 の場合も対応
-    if isinstance(audio_bytes, str):
-        audio_bytes = base64.b64decode(audio_bytes)
+    # content があるか確認
+    if hasattr(speech, "content"):
+        st.write(f"content length: {len(speech.content)}")
+        audio_bytes = speech.content
+    else:
+        st.write("❌ speech.content が存在しません")
+        return
+
+    # bytes かどうか確認
+    st.write(f"bytes?: {isinstance(audio_bytes, bytes)}")
 
     st.audio(audio_bytes, format="audio/mp3")
 
