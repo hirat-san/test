@@ -44,9 +44,10 @@ def speak(text):
         input=text
     )
 
-    audio_bytes = speech.read()
-    st.audio(audio_bytes, format="audio/mp3")
+    # ★ ここが重要：speech.read() ではなく speech.content を使う
+    audio_bytes = speech.content
 
+    st.audio(audio_bytes, format="audio/mp3")
 
 # --- 翻訳処理 ---
 def communicate():
